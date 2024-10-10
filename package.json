@@ -1,6 +1,9 @@
 {
-  "name": "bec24-bot",
+  "name": "ctf24-bot",
   "version": "1.0.0",
+   "engines": {
+    "node": "20.x"
+  },
   "main": "index.js",
   "scripts": {
     "heroku-postbuild": "npm run build",
