@@ -67,13 +67,5 @@ beforeRegistration.hears(beforeRegistrationKeybordText[1], async (ctx) => {
     return;
   }
 });
-beforeRegistration.hears(beforeRegistrationKeybordText[2], async (ctx) => {
-  try {
-    if (isTextMessage(ctx.message)) {
-      ctx.scene.enter("registration-wizard");
-    }
-  } catch (err) {
-    return;
-  }
-});
+
 export default beforeRegistration;
