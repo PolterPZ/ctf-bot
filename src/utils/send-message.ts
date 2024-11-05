@@ -7,74 +7,76 @@ import {
   isDocumentMessage,
 } from "./generaly-utils.functions";
 
-export async function sendMessage(
-  ctx: IBotContext,
-  users: any[],
-  inputMessage: Message
-) {
-  try {
-    if (ctx.chat) {
-      if (isTextMessage(inputMessage)) {
-        const message = inputMessage.text.trim();
-        for (const user of users) {
-          try {
-            if (user?.chatId) {
-              await ctx.telegram.sendMessage(user.chatId, message, {parse_mode: "HTML"});
+
+export async function sendMessage(ctx: IBotContext, users: any[], inputMessage: Message) {
+    try {
+        if (ctx.chat) {
+            if (isTextMessage(inputMessage)) {
+                const message = inputMessage.text.trim();
+
+                // Мапимо всі запити з затримкою
+                const sendTasks = users.map(async (user) => {
+                    if (user?.chatId) {
+                        try {
+                            await new Promise(resolve => setTimeout(resolve, 300)); // Затримка 300 мс
+                            await ctx.telegram.sendMessage(user.chatId, message);
+                        } catch (error) {
+                            console.warn(`Не вдалося надіслати повідомлення для ${user?.userName}:`, error);
+                        }
+                    } else {
+                        console.warn(`chatId відсутній для користувача ${user?.userName}`);
+                    }
+                });
+
+                await Promise.all(sendTasks);
+                await ctx.reply("Повідомлення було надіслано!");
+            } else if (isPhotoMessage(inputMessage)) {
+                const photo = inputMessage.photo[inputMessage.photo.length - 1].file_id; 
+                const caption = inputMessage.caption || '';
+
+                const sendTasks = users.map(async (user) => {
+                    if (user?.chatId) {
+                        try {
+                            await new Promise(resolve => setTimeout(resolve, 300)); // Затримка 300 мс
+                            await ctx.telegram.sendPhoto(user.chatId, photo, { caption });
+                        } catch (error) {
+                            console.warn(`Не вдалося надіслати фото для ${user?.userName}:`, error);
+                        }
+                    } else {
+                        console.warn(`chatId відсутній для користувача ${user?.userName}`);
+                    }
+                });
+
+                await Promise.all(sendTasks);
+                await ctx.reply("Фото було надіслано!");
+            } else if (isDocumentMessage(inputMessage)) {
+                const document = inputMessage.document.file_id;
+                const caption = inputMessage.caption || '';
+
+                const sendTasks = users.map(async (user) => {
+                    if (user?.chatId) {
+                        try {
+                            await new Promise(resolve => setTimeout(resolve, 300)); // Затримка 300 мс
+                            await ctx.telegram.sendDocument(user.chatId, document, { caption });
+                        } catch (error) {
+                            console.warn(`Не вдалося надіслати документ для ${user?.userName}:`, error);
+                        }
+                    } else {
+                        console.warn(`chatId відсутній для користувача ${user?.userName}`);
+                    }
+                });
+
+                await Promise.all(sendTasks);
+                await ctx.reply("Документ було надіслано!");
             } else {
-              console.warn(
-                `chatId відсутній для користувача ${user?.userName}`
-              );
+                await ctx.reply("Невідомий тип повідомлення. Спробуйте ще раз.");
             }
-          } catch (error) {
-            continue;
-          }
         }
-        await ctx.reply("Повідомлення було надіслано!");
-      } else if (isPhotoMessage(inputMessage)) {
-        try {
-          const photo =
-            inputMessage.photo[inputMessage.photo.length - 1].file_id;
-          const caption = inputMessage.caption || "";
-          for (const user of users) {
-            if (user?.chatId) {
-              await ctx.telegram.sendPhoto(user.chatId, photo, { caption });
-            } else {
-              console.warn(
-                `chatId відсутній для користувача ${user?.userName}`
-              );
-            }
-          }
-          await ctx.reply("Фото було надіслано!");
-        } catch (error) {
-          return;
-        }
-      } else if (isDocumentMessage(inputMessage)) {
-        try {
-          const document = inputMessage.document.file_id;
-          const caption = inputMessage.caption || "";
-          for (const user of users) {
-            if (user?.chatId) {
-              await ctx.telegram.sendDocument(user.chatId, document, {
-                caption,
-              });
-            } else {
-              console.warn(
-                `chatId відсутній для користувача ${user?.userName}`
-              );
-            }
-          }
-          await ctx.reply("Документ було надіслано!");
-        } catch (error) {
-          return;
-        }
-      } else {
-        await ctx.reply("Невідомий тип повідомлення. Спробуйте ще раз.");
-      }
+    } catch (error) {
+        console.error("Помилка надсилання повідомлень:", error);
     }
-  } catch (error) {
-    return;
-  }
 }
+
 
 export function wrapStringAsMessage(text: string): Message.TextMessage {
   return {
