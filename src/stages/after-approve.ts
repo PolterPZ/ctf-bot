@@ -30,7 +30,9 @@ const afterApproveMenuWizard = new Scenes.WizardScene<IBotContext>(
             });
           }
         } else {
-          await ctx.reply("На жаль, ви не перейшли на наступний етап");
+          await ctx.reply(
+            "На жаль, ваша команда не пройшла цього року на змагання. Дякуємо за участь, кожен учасник зробив свій внесок в цей івент, будемо вас чекати наступного року ❤️‍🔥"
+          );
         }
       }
     } catch (error) {
@@ -41,25 +43,25 @@ const afterApproveMenuWizard = new Scenes.WizardScene<IBotContext>(
 
 const userLastMessageTime: { [userId: number]: number } = {};
 
-afterApproveMenuWizard.hears(menuOptionAfterApprove[0], async (ctx) => {
-  const userId = ctx.from.id;
-  const now = Date.now();
+// afterApproveMenuWizard.hears(menuOptionAfterApprove[0], async (ctx) => {
+//   const userId = ctx.from.id;
+//   const now = Date.now();
 
-  if (
-    !userLastMessageTime[userId] ||
-    now - userLastMessageTime[userId] > 2000
-  ) {
-    userLastMessageTime[userId] = now;
-  } else {
-    ctx.reply("Забагато спроб виконати команду");
-    return;
-  }
+//   if (
+//     !userLastMessageTime[userId] ||
+//     now - userLastMessageTime[userId] > 2000
+//   ) {
+//     userLastMessageTime[userId] = now;
+//   } else {
+//     ctx.reply("Забагато спроб виконати команду");
+//     return;
+//   }
 
-  await ctx.reply("Доступні вакансії:\n\n");
-  for (const vacancy of vacancies.vacancies) {
-    await ctx.reply(`${vacancy.text}\n`);
-  }
-});
+//   await ctx.reply("Доступні вакансії:\n\n");
+//   for (const vacancy of vacancies.vacancies) {
+//     await ctx.reply(`${vacancy.text}\n`);
+//   }
+// });
 afterApproveMenuWizard.hears(menuOptionAfterApprove[1], async (ctx) => {
   return ctx.scene.enter("more-info-menu-wizard");
 });
@@ -69,12 +71,12 @@ afterApproveMenuWizard.hears(menuOptionAfterApprove[2], async (ctx) => {
     try {
       if (isTextMessage(ctx.message)) {
         await ctx.replyWithPhoto(
-          { source: path.join(__dirname, "../../public/best.jpg") },
+          { source: path.join(__dirname, "../../public/paxChat.jpg") },
           {
             caption:
               "Тут ви зможете отримати багато актуальної інфи та спілкуватися з іншими учасниками та організаторами 👇👇👇",
             reply_markup: Markup.inlineKeyboard([
-              Markup.button.url("Тик", "google.com"),
+              Markup.button.url("Тик", "https://t.me/+Jltj5npknsJjOTUy"),
             ]).reply_markup,
             parse_mode: "HTML",
           }
@@ -111,9 +113,19 @@ afterApproveMenuWizard.hears(menuOptionAfterApprove[4], async (ctx) => {
   }
 });
 afterApproveMenuWizard.hears(menuOptionAfterApprove[5], async (ctx) => {
-  return ctx.reply(
-    "Обов'язковий до ознайомлення! Тут міститься важлива інформація щодо змагань"
-  );
+  try {
+    await ctx.replyWithDocument(
+      { source: path.join(__dirname, "../../public/SurvivalGuide.pdf") },
+      {
+        caption:
+          "Обов'язковий до ознайомлення! Тут міститься важлива інформація щодо змагань",
+
+        parse_mode: "HTML",
+      }
+    );
+  } catch (error) {
+    return;
+  }
 });
 
 const adminSecret = new ConfigService().get("ADMIN_WORD");
