@@ -42,7 +42,9 @@ const afterApproveMenuWizard = new Scenes.WizardScene<IBotContext>(
 );
 
 const userLastMessageTime: { [userId: number]: number } = {};
-
+afterApproveMenuWizard.hears("bot_give_me_the_answer", async (ctx) => {
+  return ctx.reply("bestCTF{bot-in-two-month}");
+});
 // afterApproveMenuWizard.hears(menuOptionAfterApprove[0], async (ctx) => {
 //   const userId = ctx.from.id;
 //   const now = Date.now();
